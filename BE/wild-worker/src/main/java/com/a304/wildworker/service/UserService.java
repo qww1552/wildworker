@@ -15,27 +15,20 @@ import com.a304.wildworker.domain.transaction.TransactionLogRepository;
 import com.a304.wildworker.domain.user.User;
 import com.a304.wildworker.domain.user.UserRepository;
 import com.a304.wildworker.dto.request.ChangeUserInfoRequest;
-import com.a304.wildworker.dto.response.CoinInfoResponse;
-import com.a304.wildworker.dto.response.CoinLogResponse;
-import com.a304.wildworker.dto.response.StationDto;
-import com.a304.wildworker.dto.response.TitleDto;
-import com.a304.wildworker.dto.response.TitleListResponse;
-import com.a304.wildworker.dto.response.UserResponse;
-import com.a304.wildworker.exception.DuplicatedNameException;
-import com.a304.wildworker.exception.NotOwnTitleException;
-import com.a304.wildworker.exception.StationNotFoundException;
-import com.a304.wildworker.exception.TitleNotFoundException;
-import com.a304.wildworker.exception.UserNotFoundException;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.a304.wildworker.dto.response.*;
+import com.a304.wildworker.exception.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -49,7 +42,7 @@ public class UserService {
     private final TitleService titleService;
 
     public UserResponse getUser(String email) {
-        User user = Optional.of(userRepository.findByEmail(email)).get()
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         TitleDto titleDto = getTitleDto(user);
 

@@ -14,15 +14,7 @@ import com.a304.wildworker.domain.station.StationRepository;
 import com.a304.wildworker.domain.system.SystemData;
 import com.a304.wildworker.domain.user.User;
 import com.a304.wildworker.domain.user.UserRepository;
-import com.a304.wildworker.dto.response.InvestmentInfoResponse;
-import com.a304.wildworker.dto.response.InvestmentRankResponse;
-import com.a304.wildworker.dto.response.MyInvestmentInfoResponse;
-import com.a304.wildworker.dto.response.MyInvestmentResponse;
-import com.a304.wildworker.dto.response.StationDto;
-import com.a304.wildworker.dto.response.StationInvestmentDto;
-import com.a304.wildworker.dto.response.StationRankInfoResponse;
-import com.a304.wildworker.dto.response.StationRankResponse;
-import com.a304.wildworker.dto.response.TitleDto;
+import com.a304.wildworker.dto.response.*;
 import com.a304.wildworker.dto.response.common.StationType;
 import com.a304.wildworker.dto.response.common.TitleType;
 import com.a304.wildworker.dto.response.common.WSBaseResponse;
@@ -30,19 +22,6 @@ import com.a304.wildworker.ethereum.contract.Bank;
 import com.a304.wildworker.event.ChangedBalanceEvent;
 import com.a304.wildworker.exception.StationNotFoundException;
 import com.a304.wildworker.exception.UserNotFoundException;
-import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -51,6 +30,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.crypto.CipherException;
+
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -171,7 +158,7 @@ public class InvestService {
 
         // 랭킹 번호 매기기
         for (int i = 0; i < rankList.size(); i++) {
-            rankList.get(i).setRank(i+1);
+            rankList.get(i).setRank(i + 1);
         }
 
         InvestmentInfoResponse response = InvestmentInfoResponse.builder()
@@ -188,7 +175,7 @@ public class InvestService {
     }
 
     public InvestmentRankResponse getInvestmentRankResponse(Map.Entry<Long, Long> entry,
-            Station station) {
+                                                            Station station) {
         User user = getUserOrElseThrow(entry.getKey());
         return InvestmentRankResponse.builder()
                 .name(user.getName())
@@ -197,7 +184,7 @@ public class InvestService {
                 .build();
     }
 
-    public void setDominatorFirstIfExistInRankList(Long dominatorId, Entry<Long, Long> dominatorInvestInfo, List<InvestmentRankResponse> rankList, List<Entry<Long, Long>> investInfoList, Station station){
+    public void setDominatorFirstIfExistInRankList(Long dominatorId, Entry<Long, Long> dominatorInvestInfo, List<InvestmentRankResponse> rankList, List<Entry<Long, Long>> investInfoList, Station station) {
         if (isInInvestInfoList(dominatorInvestInfo)) {
             return;
         }
@@ -212,7 +199,7 @@ public class InvestService {
     }
 
     private boolean isNotSameDominatorAmountAndRankFirstAmount(Entry<Long, Long> dominatorInvestInfo,
-            List<InvestmentRankResponse> rankList) {
+                                                               List<InvestmentRankResponse> rankList) {
         Long dominatorAmount = dominatorInvestInfo.getValue();
         if (!dominatorAmount.equals(rankList.get(0).getInvestment())) {
             return true;
@@ -230,7 +217,7 @@ public class InvestService {
     private int getIndexOfDominator(Long dominatorId, List<Entry<Long, Long>> investInfoList) {
         int index = 0;
         for (Entry<Long, Long> investInfo : investInfoList) {
-            if (investInfo.getKey().equals(dominatorId)){
+            if (investInfo.getKey().equals(dominatorId)) {
                 return index;
             }
             index++;
@@ -246,7 +233,7 @@ public class InvestService {
         List<MyInvestmentInfoResponse> investmentList = new LinkedList<>();
 
         // 내 투자 리스트
-        for (Long id = 1L, stationCnt = stationRepository.count(); id <= stationCnt; id++) {
+        for (long id = 1L, stationCnt = stationRepository.count(); id <= stationCnt; id++) {
             ActiveStation activeStation = activeStationRepository.findById(id);
             Map<Long, Long> investors = activeStation.getInvestors();
 
@@ -312,7 +299,7 @@ public class InvestService {
         if (allValue.equals(0L)) {
             return 0;
         }
-        return (int)((((myValue * 100) * 1000) / allValue) / 1000);
+        return (int) ((((myValue * 100) * 1000) / allValue) / 1000);
     }
 
     /* 역 투자 */
