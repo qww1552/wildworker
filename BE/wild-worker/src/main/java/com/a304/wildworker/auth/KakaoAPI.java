@@ -24,7 +24,8 @@ public class KakaoAPI {
 
             conn.disconnect();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("logout failed");
+            log.error(e.getMessage());
         }
     }
 }

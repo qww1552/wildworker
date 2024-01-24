@@ -1,11 +1,13 @@
 package com.a304.wildworker.auth;
 
 import com.a304.wildworker.common.Constants;
+import com.a304.wildworker.exception.NotLoginException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,14 +26,15 @@ public class CustomLogoutHandler implements LogoutHandler {
         HttpSession session = request.getSession(false);
         log.info("POST:/auth/logout: {}", session);
         if (session == null) {
-            throw new RuntimeException();   //TODO
+            throw new NotLoginException();
         }
 
         String accessToken = (String) session.getAttribute(Constants.SESSION_NAME_ACCESS_TOKEN);
-        if (accessToken != null && !accessToken.isEmpty()) {
+        if (StringUtils.hasText(accessToken)) {
             kakaoAPI.logout(accessToken);
             log.info("- logout success: {}", accessToken);
+        } else {
+            log.info("- logout fails: accessToken is empty");
         }
-        log.info("- access_token: {}", session.getAttribute(Constants.SESSION_NAME_ACCESS_TOKEN));
     }
 }
