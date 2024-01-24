@@ -8,17 +8,12 @@ import com.a304.wildworker.dto.response.TitleListResponse;
 import com.a304.wildworker.dto.response.UserResponse;
 import com.a304.wildworker.exception.NotLoginException;
 import com.a304.wildworker.service.UserService;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -33,8 +28,8 @@ public class UserController {
             @AuthenticationPrincipal PrincipalDetails principal) {
         log.info("GET /user");
 
-        SessionUser user = Optional.of(principal.getSessionUser())
-                .orElseThrow(NotLoginException::new);
+        SessionUser user = getSessionUser(principal);
+
         log.info("- user: {}", user);
 
         UserResponse response = userService.getUser(user.getEmail());
@@ -46,8 +41,7 @@ public class UserController {
     public ResponseEntity<Void> changeUserInfo(
             @AuthenticationPrincipal PrincipalDetails principal,
             @RequestBody ChangeUserInfoRequest changeUserInfoRequest) {
-        SessionUser user = Optional.of(principal.getSessionUser())
-                .orElseThrow(NotLoginException::new);
+        SessionUser user = getSessionUser(principal);
 
         userService.changeUserInfo(user.getId(), changeUserInfoRequest);
 
@@ -58,8 +52,7 @@ public class UserController {
     @GetMapping("/titles")
     public ResponseEntity<TitleListResponse> getTitles(
             @AuthenticationPrincipal PrincipalDetails principal) {
-        SessionUser user = Optional.of(principal.getSessionUser())
-                .orElseThrow(NotLoginException::new);
+        SessionUser user = getSessionUser(principal);
 
         TitleListResponse response = userService.getTitleList(user.getId());
         return ResponseEntity.ok(response);
@@ -69,11 +62,18 @@ public class UserController {
     @GetMapping("/coin-log")
     public ResponseEntity<CoinLogResponse> getCoinLog(
             @AuthenticationPrincipal PrincipalDetails principal, Pageable pageable) {
-        SessionUser user = Optional.of(principal.getSessionUser())
-                .orElseThrow(NotLoginException::new);
+        SessionUser user = getSessionUser(principal);
 
         CoinLogResponse response = userService.getCoinLog(user.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
+    private static SessionUser getSessionUser(PrincipalDetails principal) {
+        SessionUser user = principal.getSessionUser();
+
+        if (user == null) {
+            throw new NotLoginException();
+        }
+        return user;
+    }
 }
